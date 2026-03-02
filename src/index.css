@@ -77,12 +77,12 @@ body {
   display: flex;
   flex-direction: column;
 
-  /* Grid pattern background */
   background-image:
     linear-gradient(var(--grid-color) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
   background-size: 40px 40px;
   background-position: center center;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
@@ -103,7 +103,7 @@ body {
   border: 3px solid var(--panel-border);
   border-radius: var(--radius);
   box-shadow: var(--panel-shadow);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1), margin 0.3s cubic-bezier(0.16, 1, 0.3, 1), border 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), height 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s cubic-bezier(0.16, 1, 0.3, 1), margin 0.3s cubic-bezier(0.16, 1, 0.3, 1), border 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header h1 {
@@ -134,7 +134,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   box-shadow: var(--panel-shadow);
-  transition: flex 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: flex 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .pane-header {
@@ -149,6 +149,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: var(--title-bar-bg);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .window-controls {
@@ -203,6 +204,7 @@ body {
   line-height: 1.6;
   outline: none;
   resize: none;
+  transition: color 0.3s ease;
 }
 
 .upload-overlay {
@@ -296,6 +298,7 @@ body {
   border-radius: var(--radius);
   box-shadow: 4px 4px 0px #ef4444;
   font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 [data-theme="dark"] .error-message {
@@ -312,6 +315,7 @@ body {
   color: var(--text-primary);
   overflow: auto;
   position: relative;
+  transition: color 0.3s ease;
 }
 
 .empty-state-badge {
@@ -322,6 +326,7 @@ body {
   font-size: 0.9rem;
   font-weight: 700;
   box-shadow: 4px 4px 0px var(--panel-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Hide scrollbar for clean UI */
