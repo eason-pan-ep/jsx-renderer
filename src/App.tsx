@@ -227,103 +227,121 @@ function App() {
 
   return (
     <div className="app-container" style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
-      {!isFullScreen && (
-        <header className="header">
-          <h1>
-            <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
-            JSX Renderer
-          </h1>
-          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+      <header
+        className="header"
+        style={{
+          transform: isFullScreen ? 'translateY(-150%)' : 'translateY(0)',
+          opacity: isFullScreen ? 0 : 1,
+          height: isFullScreen ? 0 : 'auto',
+          padding: isFullScreen ? 0 : '1rem 1.5rem',
+          margin: isFullScreen ? 0 : '',
+          border: isFullScreen ? 'none' : '',
+          overflow: 'hidden',
+          visibility: isFullScreen ? 'hidden' : 'visible'
+        }}
+      >
+        <h1>
+          <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
+          JSX Renderer
+        </h1>
+        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          {!showCode && (
             <button
               className="btn btn-secondary"
-              onClick={toggleTheme}
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              onClick={() => setShowCode(true)}
+              disabled={!isCodeLoaded}
+              style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
+              title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+              <PanelLeftOpen size={18} /> Show Code
             </button>
-            {!showCode && (
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowCode(true)}
-                disabled={!isCodeLoaded}
-                style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
-                title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
-              >
-                <PanelLeftOpen size={18} /> Show Code
-              </button>
-            )}
-            <label className="btn" style={{ margin: 0 }}>
-              <Upload size={18} />
-              Upload JSX
-              <input
-                type="file"
-                accept=".jsx,.tsx,.js,.ts,.txt"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-              />
-            </label>
-            {isCodeLoaded && (
-              <button
-                className="btn"
-                onClick={handleReset}
-                style={{ background: '#ef4444', color: 'white', borderColor: 'var(--panel-border)' }}
-                title="Clear current file"
-              >
-                <Trash2 size={18} /> Clear
-              </button>
-            )}
-          </div>
-        </header>
-      )}
+          )}
+          <label className="btn" style={{ margin: 0 }}>
+            <Upload size={18} />
+            Upload JSX
+            <input
+              type="file"
+              accept=".jsx,.tsx,.js,.ts,.txt"
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
+            />
+          </label>
+          {isCodeLoaded && (
+            <button
+              className="btn"
+              onClick={handleReset}
+              style={{ background: '#ef4444', color: 'white', borderColor: 'var(--panel-border)' }}
+              title="Clear current file"
+            >
+              <Trash2 size={18} /> Clear
+            </button>
+          )}
+        </div>
+      </header>
 
       <main className="main-content" style={isFullScreen ? { height: '100vh', margin: 0, padding: 0 } : undefined}>
-        {showCode && !isFullScreen && (
-          <div className="pane">
-            <div className="pane-header">
-              <div className="window-controls">
-                <div className="window-dot dot-red"></div>
-                <div className="window-dot dot-yellow"></div>
-                <div className="window-dot dot-green"></div>
-              </div>
-              <span className="pane-header-title">
-                <Code2 size={16} /> Source Code
-              </span>
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowCode(false)}
-                style={{
-                  padding: '0.25rem 0.6rem',
-                  fontSize: '0.8rem',
-                  borderWidth: '2px',
-                  boxShadow: '2px 2px 0px var(--panel-border)'
-                }}
-                title="Hide Code"
-              >
-                <PanelLeftClose size={15} /> Hide
-              </button>
+        <div
+          className="pane"
+          style={{
+            flex: (showCode && !isFullScreen) ? 1 : 0.00001,
+            opacity: (showCode && !isFullScreen) ? 1 : 0,
+            transform: (showCode && !isFullScreen) ? 'translateX(0)' : 'translateX(-2rem)',
+            borderWidth: (showCode && !isFullScreen) ? '3px' : '0px',
+            marginRight: (showCode && !isFullScreen) ? '0' : '-2rem', // Compensate for gap
+            visibility: (showCode && !isFullScreen) ? 'visible' : 'hidden'
+          }}
+        >
+          <div className="pane-header">
+            <div className="window-controls">
+              <div className="window-dot dot-red"></div>
+              <div className="window-dot dot-yellow"></div>
+              <div className="window-dot dot-green"></div>
             </div>
-            <div className="pane-content" onDragLeave={handleDragLeave}>
-              {fileError && <div className="error-message">{fileError}</div>}
-              <textarea
-                className="code-editor"
-                value={code}
-                readOnly
-                placeholder={`// Upload your JSX code here to see it rendered...`}
-                spellCheck={false}
-              />
+            <span className="pane-header-title">
+              <Code2 size={16} /> Source Code
+            </span>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowCode(false)}
+              style={{
+                padding: '0.25rem 0.6rem',
+                fontSize: '0.8rem',
+                borderWidth: '2px',
+                boxShadow: '2px 2px 0px var(--panel-border)'
+              }}
+              title="Hide Code"
+            >
+              <PanelLeftClose size={15} /> Hide
+            </button>
+          </div>
+          <div className="pane-content" onDragLeave={handleDragLeave}>
+            {fileError && <div className="error-message">{fileError}</div>}
+            <textarea
+              className="code-editor"
+              value={code}
+              readOnly
+              placeholder={`// Upload your JSX code here to see it rendered...`}
+              spellCheck={false}
+            />
 
-              <div className={`upload-overlay ${isHovering ? 'active' : ''}`}>
-                <div className="upload-box">
-                  <Upload size={48} className="upload-icon" />
-                  <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 800 }}>Drop file to load</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                    Supports .jsx, .tsx, .js files
-                  </p>
-                </div>
+            <div className={`upload-overlay ${isHovering ? 'active' : ''}`}>
+              <div className="upload-box">
+                <Upload size={48} className="upload-icon" />
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 800 }}>Drop file to load</h3>
+                <p style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+                  Supports .jsx, .tsx, .js files
+                </p>
               </div>
             </div>
           </div>
-        )}
+        </div>
 
         <div className="pane" style={isFullScreen ? { border: 'none', borderRadius: 0, boxShadow: 'none' } : undefined}>
           <div className="pane-header">
