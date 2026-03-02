@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Code2, Play, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun } from 'lucide-react';
+import { Upload, Code2, Play, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import * as Babel from '@babel/standalone';
 
 // The Preview component handles real-time Babel transpilation and rendering
@@ -148,6 +148,7 @@ const Preview = ({ code }: { code: string }) => {
 function App() {
   const [code, setCode] = useState<string>('');
   const [showCode, setShowCode] = useState<boolean>(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isHovering, setIsHovering] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
@@ -215,44 +216,68 @@ function App() {
     if (file) readFile(file);
   };
 
+  const handleReset = () => {
+    setCode('');
+    setFileError(null);
+    setShowCode(false);
+    setIsFullScreen(false);
+  };
+
+  const isCodeLoaded = code.trim().length > 0;
+
   return (
-    <div className="app-container" onDragOver={handleDragOver} onDrop={handleDrop}>
-      <header className="header">
-        <h1>
-          <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
-          JSX Renderer
-        </h1>
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-          <button
-            className="btn btn-secondary"
-            onClick={toggleTheme}
-            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-          {!showCode && (
+    <div className="app-container" style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
+      {!isFullScreen && (
+        <header className="header">
+          <h1>
+            <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
+            JSX Renderer
+          </h1>
+          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
             <button
               className="btn btn-secondary"
-              onClick={() => setShowCode(true)}
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
-              <PanelLeftOpen size={18} /> Show Code
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-          )}
-          <label className="btn">
-            <Upload size={18} />
-            Upload JSX
-            <input
-              type="file"
-              accept=".jsx,.tsx,.js,.ts,.txt"
-              onChange={handleFileUpload}
-              style={{ display: 'none' }}
-            />
-          </label>
-        </div>
-      </header>
+            {!showCode && (
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowCode(true)}
+                disabled={!isCodeLoaded}
+                style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
+                title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
+              >
+                <PanelLeftOpen size={18} /> Show Code
+              </button>
+            )}
+            <label className="btn" style={{ margin: 0 }}>
+              <Upload size={18} />
+              Upload JSX
+              <input
+                type="file"
+                accept=".jsx,.tsx,.js,.ts,.txt"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+            </label>
+            {isCodeLoaded && (
+              <button
+                className="btn"
+                onClick={handleReset}
+                style={{ background: '#ef4444', color: 'white', borderColor: 'var(--panel-border)' }}
+                title="Clear current file"
+              >
+                <Trash2 size={18} /> Clear
+              </button>
+            )}
+          </div>
+        </header>
+      )}
 
-      <main className="main-content">
-        {showCode && (
+      <main className="main-content" style={isFullScreen ? { height: '100vh', margin: 0, padding: 0 } : undefined}>
+        {showCode && !isFullScreen && (
           <div className="pane">
             <div className="pane-header">
               <div className="window-controls">
@@ -300,7 +325,7 @@ function App() {
           </div>
         )}
 
-        <div className="pane">
+        <div className="pane" style={isFullScreen ? { border: 'none', borderRadius: 0, boxShadow: 'none' } : undefined}>
           <div className="pane-header">
             <div className="window-controls">
               <div className="window-dot dot-red"></div>
@@ -310,6 +335,22 @@ function App() {
             <span className="pane-header-title">
               <Play size={16} /> Render Output
             </span>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              disabled={!isCodeLoaded}
+              style={{
+                padding: '0.25rem 0.6rem',
+                fontSize: '0.8rem',
+                borderWidth: '2px',
+                boxShadow: !isCodeLoaded ? 'none' : '2px 2px 0px var(--panel-border)',
+                opacity: !isCodeLoaded ? 0.5 : 1,
+                cursor: !isCodeLoaded ? 'not-allowed' : 'pointer'
+              }}
+              title={!isCodeLoaded ? "Upload a file first" : isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
+            >
+              {isFullScreen ? <><Minimize2 size={15} /> Exit Full Screen</> : <><Maximize2 size={15} /> Full Screen</>}
+            </button>
           </div>
           <div className="pane-content" style={{ padding: 0 }}>
             <div className="render-container" style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
