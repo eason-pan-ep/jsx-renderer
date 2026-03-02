@@ -1,73 +1,46 @@
-# React + TypeScript + Vite
+# JSX Renderer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, retro-tech web application that instantly transpiles and renders React components directly in your browser. 
 
-Currently, two official plugins are available:
+Built with React 19, TypeScript, and Vite.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **Live Transpilation**: Utilizing `@babel/standalone`, this app parses and executes modern ES6 and JSX syntax directly in the client—no backend required.
+- **Secure Sandbox**: The evaluation environment is heavily restricted by a custom Babel AST plugin, completely blocking access to sensitive global variables like `window`, `document`, `fetch`, `localStorage`, etc.
+- **Drag and Drop**: Simply drag a `.jsx`, `.tsx`, or `.js` file onto the window, and it will load into the viewer and render the component instantly.
+- **Clean Retro Tech Aesthetic**: A premium interface featuring thick window borders, structural shadows, background grids, and classic window control dots.
+- **Theme Toggling**: Seamlessly switch between Tech Light mode (default) and Cyber Dark mode.
+- **React Hooks Support**: You can upload functional components that utilize standard hooks like `useState` and `useEffect`.
+- **Graceful Error Handling**: Syntax errors are caught and displayed safely in the UI, rather than crashing the page.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Getting Started
 
-## Expanding the ESLint configuration
+To run this project locally:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. Clone the repository and navigate into the directory:
+   ```bash
+   git clone <your-repo-url>
+   cd jsx-renderer
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Deployment
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+This app is completely static and can be hosted on platforms like Cloudflare Pages, Vercel, or Netlify.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+See [CLOUDFLARE_PAGES_DEPLOY.md](./CLOUDFLARE_PAGES_DEPLOY.md) for a step-by-step guide on how to host this site on Cloudflare.
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Technologies Used
+- React 19
+- Vite
+- TypeScript
+- `@babel/standalone`
+- Lucide React (Icons)
