@@ -1,9 +1,74 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Code2, Play, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { Upload, Code2, Play, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun, Maximize2, Minimize2, Trash2, Atom, Star } from 'lucide-react';
 import * as Babel from '@babel/standalone';
 
 // The Preview component handles real-time Babel transpilation and rendering
-const Preview = ({ code }: { code: string }) => {
+const EXAMPLE_JSX = `import React, { useState } from 'react';
+
+export default function RetroCounter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div style={{
+      padding: '2rem',
+      maxWidth: '400px',
+      margin: '2rem auto',
+      background: 'var(--panel-bg, #fff)',
+      border: '3px solid var(--panel-border, #0f172a)',
+      boxShadow: '6px 6px 0px var(--panel-border, #0f172a)',
+      borderRadius: '8px',
+      fontFamily: 'system-ui, sans-serif'
+    }}>
+      <h2 style={{ marginTop: 0, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        System Status
+      </h2>
+      <div style={{
+        background: 'var(--title-bar-bg, #e2e8f0)',
+        padding: '1.5rem',
+        margin: '1.5rem 0',
+        textAlign: 'center',
+        border: '3px solid var(--panel-border, #0f172a)',
+        fontSize: '2rem',
+        fontWeight: 'bold',
+      }}>
+        Cycles: {count}
+      </div>
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <button 
+          onClick={() => setCount(c => c - 1)}
+          style={{
+            flex: 1,
+            padding: '0.75rem',
+            background: 'var(--panel-bg, #fff)',
+            border: '3px solid var(--panel-border, #0f172a)',
+            boxShadow: '4px 4px 0px var(--panel-border, #0f172a)',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}
+        >
+          DECREMENT
+        </button>
+        <button 
+          onClick={() => setCount(c => c + 1)}
+          style={{
+            flex: 1,
+            padding: '0.75rem',
+            background: 'var(--accent-color, #3b82f6)',
+            color: '#fff',
+            border: '3px solid var(--panel-border, #0f172a)',
+            boxShadow: '4px 4px 0px var(--panel-border, #0f172a)',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}
+        >
+          INCREMENT
+        </button>
+      </div>
+    </div>
+  );
+}`;
+
+const Preview = ({ code, setCode }: { code: string, setCode: (code: string) => void }) => {
   const [Component, setComponent] = useState<React.ComponentType | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,15 +175,6 @@ const Preview = ({ code }: { code: string }) => {
             textAlign: 'center',
             padding: '2rem'
           }}>
-            <div style={{
-              background: 'var(--sparkle-bg)',
-              padding: '2rem',
-              borderRadius: '50%',
-              border: '3px solid var(--panel-border)',
-              boxShadow: '6px 6px 0px var(--panel-border)'
-            }}>
-              <Sparkles size={48} color="var(--sparkle-color)" />
-            </div>
             <div>
               <h2 style={{ marginBottom: '0.75rem', fontSize: '1.8rem', fontWeight: 800 }}>Ready to Render</h2>
               <p style={{ maxWidth: '400px', lineHeight: 1.6, color: 'var(--text-secondary)', fontWeight: 600 }}>
@@ -127,15 +183,30 @@ const Preview = ({ code }: { code: string }) => {
             </div>
             <div style={{
               display: 'flex',
-              gap: '1rem',
-              marginTop: '1rem'
+              gap: '2.5rem', /* Increased gap between folders */
             }}>
               <div className="empty-state-badge">
-                ✨ ES6 & TS Support
+                <div className="badge-icon" style={{ '--folder-color': '#d1b8cc' } as React.CSSProperties}>
+                  <span><Star size={24} color="var(--text-primary)" strokeWidth={2.5} /></span>
+                </div>
+                <span>ES6 & TS</span>
               </div>
               <div className="empty-state-badge">
-                ⚛️ React Hooks
+                <div className="badge-icon" style={{ '--folder-color': '#f1c27d' } as React.CSSProperties}>
+                  <span><Atom size={24} color="var(--text-primary)" strokeWidth={2.5} /></span>
+                </div>
+                <span>React Hooks</span>
               </div>
+            </div>
+            <div style={{ marginTop: '1rem' }}>
+              <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Or try it out with a sample component:</p>
+              <button
+                className="btn"
+                onClick={() => setCode(EXAMPLE_JSX)}
+                style={{ fontSize: '1rem', padding: '0.75rem 1.5rem' }}
+              >
+                <Code2 size={20} /> Load Example JSX
+              </button>
             </div>
           </div>
         )
@@ -143,7 +214,6 @@ const Preview = ({ code }: { code: string }) => {
     </>
   );
 };
-
 
 function App() {
   const [code, setCode] = useState<string>('');
@@ -420,7 +490,7 @@ function App() {
           </div>
           <div className="pane-content" style={{ padding: 0 }}>
             <div className="render-container" style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
-              <Preview code={code} />
+              <Preview code={code} setCode={setCode} />
             </div>
           </div>
         </div>

@@ -527,14 +527,78 @@ body {
 }
 
 .empty-state-badge {
-  padding: 0.75rem 1.25rem;
-  background: var(--panel-bg);
-  border-radius: var(--radius);
-  border: 3px solid var(--panel-border);
-  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  /* Increased gap */
+  padding: 0;
+  /* Remove padding */
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--title-bar-text);
+  /* Darker text */
+  font-size: 1rem;
+  /* Slightly larger text */
   font-weight: 700;
-  box-shadow: 4px 4px 0px var(--panel-border);
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  /* Bolder text */
+  cursor: default;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.empty-state-badge .badge-icon {
+  width: 80px;
+  /* Narrower */
+  height: 50px;
+  /* Taller */
+  background-color: var(--folder-color, #d1b8cc);
+  border: 3px solid var(--panel-border);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+/* 
+ The tab needs to seamlessly blend into the main folder body. 
+ We draw the tab, and then use a second psuedo element to hide the border crossover 
+*/
+.empty-state-badge .badge-icon::before {
+  content: "";
+  position: absolute;
+  top: -14px;
+  right: -3px;
+  /* Move tab to the right */
+  width: 38px;
+  /* Wider tab */
+  height: 14px;
+  background-color: var(--folder-color, #d1b8cc);
+  border: 3px solid var(--panel-border);
+  border-bottom: none;
+  border-radius: 0;
+}
+
+/* Provide the bottom border of the tab, but colored the same as the folder background to erase the top border of the main folder box */
+.empty-state-badge .badge-icon::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  right: 0px;
+  /* Align mask to the right */
+  width: 35px;
+  /* Inner width of the new tab */
+  height: 3px;
+  background-color: var(--folder-color, #d1b8cc);
+  z-index: 1;
+}
+
+/* Adjust the emoji icon inside to sit properly given the tab offset */
+.empty-state-badge .badge-icon span {
+  position: relative;
+  z-index: 2;
 }
 
 /* Hide scrollbar for clean UI */
