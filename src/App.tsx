@@ -152,6 +152,7 @@ function App() {
   const [isHovering, setIsHovering] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const [isFlickering, setIsFlickering] = useState(false);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
@@ -175,8 +176,23 @@ function App() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    setIsFlickering(true);
+    setTimeout(() => {
+      setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    }, 250); // change theme in the middle of TV off
+
+    setTimeout(() => {
+      setIsFlickering(false);
+    }, 500); // matches the 0.5s CSS animation
   };
+
+  useEffect(() => {
+    if (isFlickering) {
+      document.body.classList.add('theme-tv');
+    } else {
+      document.body.classList.remove('theme-tv');
+    }
+  }, [isFlickering]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
