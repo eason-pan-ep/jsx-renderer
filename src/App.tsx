@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Upload, Code2, Play, FileJson, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Upload, Code2, Play, FileJson, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun } from 'lucide-react';
 import * as Babel from '@babel/standalone';
 
 // The Preview component handles real-time Babel transpilation and rendering
@@ -150,6 +150,27 @@ function App() {
   const [showCode, setShowCode] = useState<boolean>(false);
   const [isHovering, setIsHovering] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // Initialize theme from localStorage or system preference
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setTheme(savedTheme as 'dark' | 'light');
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setTheme('light');
+    }
+  }, []);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -197,6 +218,14 @@ function App() {
           JSX Renderer
         </h1>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            className="btn"
+            onClick={toggleTheme}
+            style={{ background: 'transparent', border: '1px solid var(--panel-border)', color: 'var(--text-primary)' }}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           {!showCode && (
             <button
               className="btn"
