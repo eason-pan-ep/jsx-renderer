@@ -153,6 +153,8 @@ function App() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [isFlickering, setIsFlickering] = useState(false);
+  const [isGlitching, setIsGlitching] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
@@ -200,6 +202,30 @@ function App() {
     readFile(file);
   };
 
+  const triggerGlitch = (action: () => void) => {
+    setIsGlitching(true);
+    // Execute the layout/state action in the middle of the TV switching animation (0.25s total)
+    setTimeout(() => {
+      action();
+    }, 125);
+
+    // End animation
+    setTimeout(() => {
+      setIsGlitching(false);
+    }, 250);
+  };
+
+  const triggerClearGlitch = (action: () => void) => {
+    // The Clear button uses the heavy TV channel switch effect.
+    setIsClearing(true);
+    setTimeout(() => {
+      action();
+    }, 125);
+    setTimeout(() => {
+      setIsClearing(false);
+    }, 250);
+  };
+
   const readFile = (file: File) => {
     // Basic safety check for reasonable extensions (since Babel can't parse huge binary files)
     if (!file.name.match(/\.(js|jsx|ts|tsx|txt)$/i) && file.type && !file.type.includes('text')) {
@@ -233,16 +259,22 @@ function App() {
   };
 
   const handleReset = () => {
-    setCode('');
-    setFileError(null);
-    setShowCode(false);
-    setIsFullScreen(false);
+    triggerClearGlitch(() => {
+      setCode('');
+      setFileError(null);
+      setShowCode(false);
+      setIsFullScreen(false);
+    });
   };
 
   const isCodeLoaded = code.trim().length > 0;
 
+  let animationClass = '';
+  if (isGlitching) animationClass = 'layout-glitch';
+  if (isClearing) animationClass = 'channel-switching';
+
   return (
-    <div className="app-container" style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
+    <div className={`app-container ${animationClass}`} style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
       <header
         className="header"
         style={{
@@ -271,7 +303,7 @@ function App() {
           {!showCode && (
             <button
               className="btn btn-secondary"
-              onClick={() => setShowCode(true)}
+              onClick={() => triggerGlitch(() => setShowCode(true))}
               disabled={!isCodeLoaded}
               style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
               title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
@@ -307,8 +339,8 @@ function App() {
           className="pane"
           style={{
             flex: (showCode && !isFullScreen) ? 1 : 0.00001,
-            opacity: (showCode && !isFullScreen) ? 1 : 0,
-            transform: (showCode && !isFullScreen) ? 'translateX(0)' : 'translateX(-2rem)',
+            // opacity: (showCode && !isFullScreen) ? 1 : 0, // removed opacity to let scale handle hidden state
+            transform: (showCode && !isFullScreen) ? 'translateX(0) scaleX(1)' : 'translateX(-2rem) scaleX(0)',
             borderWidth: (showCode && !isFullScreen) ? '3px' : '0px',
             marginRight: (showCode && !isFullScreen) ? '0' : '-2rem', // Compensate for gap
             visibility: (showCode && !isFullScreen) ? 'visible' : 'hidden'
@@ -325,7 +357,7 @@ function App() {
             </span>
             <button
               className="btn btn-secondary"
-              onClick={() => setShowCode(false)}
+              onClick={() => triggerGlitch(() => setShowCode(false))}
               style={{
                 padding: '0.25rem 0.6rem',
                 fontSize: '0.8rem',
@@ -371,7 +403,7 @@ function App() {
             </span>
             <button
               className="btn btn-secondary"
-              onClick={() => setIsFullScreen(!isFullScreen)}
+              onClick={() => triggerGlitch(() => setIsFullScreen(!isFullScreen))}
               disabled={!isCodeLoaded}
               style={{
                 padding: '0.25rem 0.6rem',
