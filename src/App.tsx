@@ -91,7 +91,7 @@ const Preview = ({ code }: { code: string }) => {
   return (
     <>
       {error && (
-        <div className="error-message" style={{ marginBottom: '1rem' }}>
+        <div className="error-message">
           <strong>Error: </strong>
           {error}
         </div>
@@ -106,23 +106,23 @@ const Preview = ({ code }: { code: string }) => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#64748b',
-            gap: '1.5rem',
+            gap: '2rem',
             textAlign: 'center',
             padding: '2rem'
           }}>
             <div style={{
-              background: 'linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%)',
+              background: 'var(--sparkle-bg)',
               padding: '2rem',
               borderRadius: '50%',
-              boxShadow: '0 10px 25px rgba(124, 58, 237, 0.2)'
+              border: '3px solid var(--panel-border)',
+              boxShadow: '6px 6px 0px var(--panel-border)'
             }}>
-              <Sparkles size={48} color="#7c3aed" />
+              <Sparkles size={48} color="var(--sparkle-color)" />
             </div>
             <div>
-              <h2 style={{ color: '#1e293b', marginBottom: '0.5rem', fontSize: '1.5rem' }}>Ready to Render</h2>
-              <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>
-                Upload a <code>.jsx</code> file to see it come to life instantly.
+              <h2 style={{ marginBottom: '0.75rem', fontSize: '1.8rem', fontWeight: 800 }}>Ready to Render</h2>
+              <p style={{ maxWidth: '400px', lineHeight: 1.6, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Upload a <strong>.jsx</strong> file to see it come to life instantly.
               </p>
             </div>
             <div style={{
@@ -130,11 +130,11 @@ const Preview = ({ code }: { code: string }) => {
               gap: '1rem',
               marginTop: '1rem'
             }}>
-              <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.9rem' }}>
-                ✨ ES6 & TypeScript Support
+              <div className="empty-state-badge">
+                ✨ ES6 & TS Support
               </div>
-              <div style={{ padding: '0.75rem 1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.9rem' }}>
-                ⚛️ React Hooks Ready
+              <div className="empty-state-badge">
+                ⚛️ React Hooks
               </div>
             </div>
           </div>
@@ -150,14 +150,19 @@ function App() {
   const [showCode, setShowCode] = useState<boolean>(false);
   const [isHovering, setIsHovering] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) {
-      setTheme(savedTheme as 'dark' | 'light');
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      // Validate savedTheme
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        setTheme(savedTheme as 'dark' | 'light');
+      }
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      // Per instructions, light mode should be explicit default, but honoring explicit system preset is nice.
+      // Easiest true default: just light mode.
       setTheme('light');
     }
   }, []);
@@ -214,30 +219,28 @@ function App() {
     <div className="app-container" onDragOver={handleDragOver} onDrop={handleDrop}>
       <header className="header">
         <h1>
-          <FileJson size={28} color="#38bdf8" />
+          <FileJson size={32} color="var(--accent-color)" />
           JSX Renderer
         </h1>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
           <button
-            className="btn"
+            className="btn btn-secondary"
             onClick={toggleTheme}
-            style={{ background: 'transparent', border: '1px solid var(--panel-border)', color: 'var(--text-primary)' }}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           >
-            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
           {!showCode && (
             <button
-              className="btn"
+              className="btn btn-secondary"
               onClick={() => setShowCode(true)}
-              style={{ background: 'transparent', border: '1px solid var(--panel-border)', color: 'var(--text-primary)' }}
             >
               <PanelLeftOpen size={18} /> Show Code
             </button>
           )}
           <label className="btn">
             <Upload size={18} />
-            Upload JSX File
+            Upload JSX
             <input
               type="file"
               accept=".jsx,.tsx,.js,.ts,.txt"
@@ -252,26 +255,30 @@ function App() {
         {showCode && (
           <div className="pane">
             <div className="pane-header">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div className="window-controls">
+                <div className="window-dot dot-red"></div>
+                <div className="window-dot dot-yellow"></div>
+                <div className="window-dot dot-green"></div>
+              </div>
+              <span className="pane-header-title">
                 <Code2 size={16} /> Source Code
               </span>
               <button
-                className="btn"
+                className="btn btn-secondary"
                 onClick={() => setShowCode(false)}
                 style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  padding: '0.25rem 0.5rem',
-                  fontSize: '0.8rem'
+                  padding: '0.25rem 0.6rem',
+                  fontSize: '0.8rem',
+                  borderWidth: '2px',
+                  boxShadow: '2px 2px 0px var(--panel-border)'
                 }}
                 title="Hide Code"
               >
-                <PanelLeftClose size={16} /> Hide
+                <PanelLeftClose size={15} /> Hide
               </button>
             </div>
             <div className="pane-content" onDragLeave={handleDragLeave}>
-              {fileError && <div className="error-message" style={{ marginBottom: '1rem' }}>{fileError}</div>}
+              {fileError && <div className="error-message">{fileError}</div>}
               <textarea
                 className="code-editor"
                 value={code}
@@ -283,8 +290,8 @@ function App() {
               <div className={`upload-overlay ${isHovering ? 'active' : ''}`}>
                 <div className="upload-box">
                   <Upload size={48} className="upload-icon" />
-                  <h3>Drop file to load</h3>
-                  <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 800 }}>Drop file to load</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
                     Supports .jsx, .tsx, .js files
                   </p>
                 </div>
@@ -295,12 +302,17 @@ function App() {
 
         <div className="pane">
           <div className="pane-header">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="window-controls">
+              <div className="window-dot dot-red"></div>
+              <div className="window-dot dot-yellow"></div>
+              <div className="window-dot dot-green"></div>
+            </div>
+            <span className="pane-header-title">
               <Play size={16} /> Render Output
             </span>
           </div>
           <div className="pane-content" style={{ padding: 0 }}>
-            <div className="render-container">
+            <div className="render-container" style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
               <Preview code={code} />
             </div>
           </div>
