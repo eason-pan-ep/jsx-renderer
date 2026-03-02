@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Code2, Play, FileJson, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun } from 'lucide-react';
+import { Upload, Code2, Play, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun } from 'lucide-react';
 import * as Babel from '@babel/standalone';
 
 // The Preview component handles real-time Babel transpilation and rendering
@@ -219,7 +219,7 @@ function App() {
     <div className="app-container" onDragOver={handleDragOver} onDrop={handleDrop}>
       <header className="header">
         <h1>
-          <FileJson size={32} color="var(--accent-color)" />
+          <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
           JSX Renderer
         </h1>
         <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
