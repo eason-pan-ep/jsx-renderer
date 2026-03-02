@@ -122,7 +122,7 @@ const Preview = ({ code }: { code: string }) => {
             <div>
               <h2 style={{ color: '#1e293b', marginBottom: '0.5rem', fontSize: '1.5rem' }}>Ready to Render</h2>
               <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>
-                Write your React components in the editor, or upload a <code>.jsx</code> file to see it come to life instantly.
+                Upload a <code>.jsx</code> file to see it come to life instantly.
               </p>
             </div>
             <div style={{
@@ -246,19 +246,8 @@ function App() {
               <textarea
                 className="code-editor"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder={`// Write or upload your JSX code here...
-
-import React from 'react';
-
-export default function MyComponent() {
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center', background: '#e0e7ff', borderRadius: '8px' }}>
-      <h1 style={{ color: '#4f46e5' }}>Hello from JSX!</h1>
-      <p style={{ color: '#4338ca' }}>You can write code here directly or upload a file.</p>
-    </div>
-  );
-}`}
+                readOnly
+                placeholder={`// Upload your JSX code here to see it rendered...`}
                 spellCheck={false}
               />
 
