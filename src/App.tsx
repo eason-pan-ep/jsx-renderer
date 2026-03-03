@@ -262,7 +262,7 @@ function App() {
           }
           contentStyle={{ padding: 0 }}
         >
-          <div className="render-container" style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
+          <div className="render-container" style={{ height: '100%', boxSizing: 'border-box' }}>
             <Preview code={code} setCode={setCode} />
           </div>
         </Pane>
