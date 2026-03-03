@@ -226,3 +226,12 @@
         opacity: 1;
     }
 }
+
+/* Sandboxed iframe for user code rendering */
+.sandbox-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    background: #ffffff;
+}
