@@ -6,13 +6,13 @@ Built with React 19, TypeScript, and Vite.
 
 ## Features
 
-- **Live Transpilation**: Utilizing `@babel/standalone`, this app parses and executes modern ES6 and JSX syntax directly in the client—no backend required.
-- **Secure Sandbox**: The evaluation environment is heavily restricted by a custom Babel AST plugin, completely blocking access to sensitive global variables like `window`, `document`, `fetch`, `localStorage`, etc.
+- **Live Transpilation**: Utilizing `@babel/standalone`, this app parses and executes modern ES6, TypeScript, and JSX syntax directly in the client—no backend required.
+- **Sandboxed Rendering**: User code runs inside a browser-enforced `<iframe sandbox="allow-scripts">`, providing full access to browser APIs (`window`, `document`, `fetch`, etc.) while keeping the host page completely isolated and secure.
 - **Drag and Drop**: Simply drag a `.jsx`, `.tsx`, or `.js` file onto the window, and it will load into the viewer and render the component instantly.
-- **Clean Retro Tech Aesthetic**: A premium interface featuring thick window borders, structural shadows, background grids, and classic window control dots.
-- **Theme Toggling**: Seamlessly switch between Tech Light mode (default) and Cyber Dark mode.
-- **React Hooks Support**: You can upload functional components that utilize standard hooks like `useState` and `useEffect`.
-- **Graceful Error Handling**: Syntax errors are caught and displayed safely in the UI, rather than crashing the page.
+- **Clean Retro Tech Aesthetic**: A premium interface featuring thick window borders, structural shadows, background grids, and classic window control dots with hidden easter eggs.
+- **Theme Toggling**: Seamlessly switch between Tech Light mode (default) and Cyber Dark mode with a satisfying TV-flicker transition.
+- **React Hooks Support**: Upload functional components that utilize standard hooks like `useState` and `useEffect`.
+- **Graceful Error Handling**: Compile-time and runtime errors are caught and displayed safely in the UI, rather than crashing the page.
 
 ## Getting Started
 
@@ -32,11 +32,23 @@ To run this project locally:
    npm run dev
    ```
 
-## Deployment
+## Architecture
 
-This app is completely static and can be hosted on platforms like Cloudflare Pages, Vercel, or Netlify.
+### Sandbox Isolation
 
-See [CLOUDFLARE_PAGES_DEPLOY.md](./CLOUDFLARE_PAGES_DEPLOY.md) for a step-by-step guide on how to host this site on Cloudflare.
+User-uploaded JSX is rendered inside a sandboxed `<iframe>` for security:
+
+1. **Babel transpiles** the JSX/TSX to plain JavaScript (in the parent page)
+2. A self-contained **HTML document** is assembled with React inlined
+3. The HTML is rendered via `<iframe sandbox="allow-scripts" srcdoc="...">` 
+4. **Errors are reported** back to the parent via `postMessage`
+
+The React runtime used inside the iframe is pre-built as a standalone IIFE bundle (`src/sandbox/react-bundle.js`). If you upgrade React, rebuild it with:
+
+```bash
+npm run build:sandbox
+```
+
 
 ## Technologies Used
 - React 19
