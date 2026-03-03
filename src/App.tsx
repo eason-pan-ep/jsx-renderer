@@ -12,7 +12,6 @@ function App() {
   const [fileError, setFileError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [isFlickering, setIsFlickering] = useState(false);
-  const [isGlitching, setIsGlitching] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
 
   // Initialize theme from localStorage or system preference
@@ -59,19 +58,6 @@ function App() {
     const file = event.target.files?.[0];
     if (!file) return;
     readFile(file);
-  };
-
-  const triggerGlitch = (action: () => void) => {
-    setIsGlitching(true);
-    // Execute the layout/state action in the middle of the TV switching animation (0.25s total)
-    setTimeout(() => {
-      action();
-    }, 125);
-
-    // End animation
-    setTimeout(() => {
-      setIsGlitching(false);
-    }, 250);
   };
 
   const triggerClearGlitch = (action: () => void) => {
@@ -129,7 +115,6 @@ function App() {
   const isCodeLoaded = code.trim().length > 0;
 
   let animationClass = '';
-  if (isGlitching) animationClass = 'layout-glitch';
   if (isClearing) animationClass = 'channel-switching';
 
   return (
@@ -163,7 +148,7 @@ function App() {
           {!showCode && (
             <Button
               variant="secondary"
-              onClick={() => triggerGlitch(() => setShowCode(true))}
+              onClick={() => setShowCode(true)}
               disabled={!isCodeLoaded}
               style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
               title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
@@ -208,7 +193,7 @@ function App() {
           headerAction={
             <Button
               variant="secondary"
-              onClick={() => triggerGlitch(() => setShowCode(false))}
+              onClick={() => setShowCode(false)}
               style={{
                 padding: '0.25rem 0.6rem',
                 fontSize: '0.8rem',
@@ -249,7 +234,7 @@ function App() {
           headerAction={
             <Button
               variant="secondary"
-              onClick={() => triggerGlitch(() => setIsFullScreen(!isFullScreen))}
+              onClick={() => setIsFullScreen(!isFullScreen)}
               disabled={!isCodeLoaded}
               style={{
                 padding: '0.25rem 0.6rem',
