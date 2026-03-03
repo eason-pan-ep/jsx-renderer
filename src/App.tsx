@@ -1,156 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Code2, Play, PanelLeftClose, PanelLeftOpen, Sparkles, Moon, Sun } from 'lucide-react';
-import * as Babel from '@babel/standalone';
-
-// The Preview component handles real-time Babel transpilation and rendering
-const Preview = ({ code }: { code: string }) => {
-  const [Component, setComponent] = useState<React.ComponentType | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  React.useEffect(() => {
-    if (!code.trim()) {
-      setComponent(null);
-      setError(null);
-      return;
-    }
-
-    try {
-      // Security Plugin to prevent basic XSS and malicious global access
-      const securityPlugin = function () {
-        return {
-          visitor: {
-            Identifier(path: any) {
-              const forbidden = ['window', 'document', 'localStorage', 'sessionStorage', 'fetch', 'XMLHttpRequest', 'eval', 'globalThis', 'Function'];
-              if (forbidden.includes(path.node.name)) {
-                // Allow if it's a property of an object (e.g., obj.window)
-                if (path.parentPath.isMemberExpression() && path.parentKey === 'property' && !path.parent.computed) {
-                  return;
-                }
-                throw new Error(`Security Exception: Usage of '${path.node.name}' is not allowed in this sandbox.`);
-              }
-            }
-          }
-        };
-      };
-
-      // 1. Transpile JSX/TSX to JS
-      const result = Babel.transform(code, {
-        presets: ['env', 'react', 'typescript'],
-        plugins: [securityPlugin],
-        filename: 'dynamic.tsx'
-      });
-
-      if (!result.code) {
-        throw new Error('Compilation failed silently.');
-      }
-
-      // 2. Evaluate the commonjs module output
-      const exports: Record<string, any> = {};
-      const customRequire = (moduleName: string) => {
-        if (moduleName === 'react') return React;
-        throw new Error(`Module '${moduleName}' cannot be resolved in browser context`);
-      };
-
-      // We wrap the code in a function providing standard CommonJS globals, and strictly block sensitive globals
-      const executeFn = new Function(
-        'exports', 'require', 'React', 'window', 'document', 'fetch', 'localStorage', 'sessionStorage', 'globalThis',
-        `"use strict";\n${result.code}`
-      );
-      executeFn(exports, customRequire, React);
-
-      // 3. Extract the default export or the first available component
-      let ExtractedComponent = exports.default;
-
-      // Fallback: if no default export, see if they exported something else like: export const App = () => ...
-      if (!ExtractedComponent) {
-        const exportedValues = Object.values(exports);
-        if (exportedValues.length > 0) {
-          ExtractedComponent = exportedValues[0];
-        } else {
-          // Fallback for code like: function App() { return <div></div> }; return App;
-          // Wait, Babel might not expose functions unless explicitly exported. 
-        }
-      }
-
-      if (typeof ExtractedComponent === 'function' || (typeof ExtractedComponent === 'object' && ExtractedComponent !== null)) {
-        setComponent(() => ExtractedComponent);
-        setError(null);
-      } else {
-        throw new Error('Your code must `export default` a valid React component.');
-      }
-
-    } catch (err: any) {
-      console.error(err);
-      // Clean up babel error messages if they are too noisy
-      let errorMsg = err.message || String(err);
-      setError(errorMsg);
-      // We don't nullify Component here so the user can still see their last valid render while typing
-    }
-  }, [code]);
-
-  return (
-    <>
-      {error && (
-        <div className="error-message">
-          <strong>Error: </strong>
-          {error}
-        </div>
-      )}
-      {Component ? (
-        <Component />
-      ) : (
-        !error && (
-          <div style={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '2rem',
-            textAlign: 'center',
-            padding: '2rem'
-          }}>
-            <div style={{
-              background: 'var(--sparkle-bg)',
-              padding: '2rem',
-              borderRadius: '50%',
-              border: '3px solid var(--panel-border)',
-              boxShadow: '6px 6px 0px var(--panel-border)'
-            }}>
-              <Sparkles size={48} color="var(--sparkle-color)" />
-            </div>
-            <div>
-              <h2 style={{ marginBottom: '0.75rem', fontSize: '1.8rem', fontWeight: 800 }}>Ready to Render</h2>
-              <p style={{ maxWidth: '400px', lineHeight: 1.6, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                Upload a <strong>.jsx</strong> file to see it come to life instantly.
-              </p>
-            </div>
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              marginTop: '1rem'
-            }}>
-              <div className="empty-state-badge">
-                ✨ ES6 & TS Support
-              </div>
-              <div className="empty-state-badge">
-                ⚛️ React Hooks
-              </div>
-            </div>
-          </div>
-        )
-      )}
-    </>
-  );
-};
-
+import { Upload, Play, PanelLeftClose, PanelLeftOpen, Moon, Sun, Maximize2, Minimize2, Trash2, Code2 } from 'lucide-react';
+import { Preview } from './components/Preview';
+import { Button } from './components/Button';
+import { Pane } from './components/Pane';
+import { ConfirmModal } from './components/ConfirmModal';
 
 function App() {
   const [code, setCode] = useState<string>('');
   const [showCode, setShowCode] = useState<boolean>(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isHovering, setIsHovering] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
+  const [isFlickering, setIsFlickering] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
@@ -174,13 +38,39 @@ function App() {
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    setIsFlickering(true);
+    setTimeout(() => {
+      setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+    }, 250); // change theme in the middle of TV off
+
+    setTimeout(() => {
+      setIsFlickering(false);
+    }, 500); // matches the 0.5s CSS animation
   };
+
+  useEffect(() => {
+    if (isFlickering) {
+      document.body.classList.add('theme-tv');
+    } else {
+      document.body.classList.remove('theme-tv');
+    }
+  }, [isFlickering]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     readFile(file);
+  };
+
+  const triggerClearGlitch = (action: () => void) => {
+    // The Clear button uses the heavy TV channel switch effect.
+    setIsClearing(true);
+    setTimeout(() => {
+      action();
+    }, 125);
+    setTimeout(() => {
+      setIsClearing(false);
+    }, 250);
   };
 
   const readFile = (file: File) => {
@@ -215,30 +105,66 @@ function App() {
     if (file) readFile(file);
   };
 
+  const handleReset = () => {
+    setShowConfirm(true);
+  };
+
+  const confirmClear = () => {
+    setShowConfirm(false);
+    triggerClearGlitch(() => {
+      setCode('');
+      setFileError(null);
+      setShowCode(false);
+      setIsFullScreen(false);
+    });
+  };
+
+  const isCodeLoaded = code.trim().length > 0;
+
+  let animationClass = '';
+  if (isClearing) animationClass = 'channel-switching';
+
   return (
-    <div className="app-container" onDragOver={handleDragOver} onDrop={handleDrop}>
-      <header className="header">
+    <div className={`app-container ${animationClass}`} style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
+      <header
+        className="header"
+        style={{
+          transform: isFullScreen ? 'translateY(-150%)' : 'translateY(0)',
+          opacity: isFullScreen ? 0 : 1,
+          height: isFullScreen ? 0 : 'auto',
+          padding: isFullScreen ? 0 : '1rem 1.5rem',
+          margin: isFullScreen ? 0 : '',
+          border: isFullScreen ? 'none' : '',
+          overflow: 'hidden',
+          visibility: isFullScreen ? 'hidden' : 'visible'
+        }}
+      >
         <h1>
           <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
           JSX Renderer
         </h1>
         <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
-          <button
-            className="btn btn-secondary"
+          <Button
+            variant="secondary"
             onClick={toggleTheme}
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            icon={theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+            {""}
+          </Button>
           {!showCode && (
-            <button
-              className="btn btn-secondary"
+            <Button
+              variant="secondary"
               onClick={() => setShowCode(true)}
+              disabled={!isCodeLoaded}
+              style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
+              title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
+              icon={<PanelLeftOpen size={18} />}
             >
-              <PanelLeftOpen size={18} /> Show Code
-            </button>
+              Show Code
+            </Button>
           )}
-          <label className="btn">
+          <label className="btn" style={{ margin: 0 }}>
             <Upload size={18} />
             Upload JSX
             <input
@@ -248,76 +174,105 @@ function App() {
               style={{ display: 'none' }}
             />
           </label>
+          {isCodeLoaded && (
+            <Button
+              variant="danger"
+              onClick={handleReset}
+              title="Clear current file"
+              icon={<Trash2 size={18} />}
+            >
+              Clear
+            </Button>
+          )}
         </div>
       </header>
 
-      <main className="main-content">
-        {showCode && (
-          <div className="pane">
-            <div className="pane-header">
-              <div className="window-controls">
-                <div className="window-dot dot-red"></div>
-                <div className="window-dot dot-yellow"></div>
-                <div className="window-dot dot-green"></div>
-              </div>
-              <span className="pane-header-title">
-                <Code2 size={16} /> Source Code
-              </span>
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowCode(false)}
-                style={{
-                  padding: '0.25rem 0.6rem',
-                  fontSize: '0.8rem',
-                  borderWidth: '2px',
-                  boxShadow: '2px 2px 0px var(--panel-border)'
-                }}
-                title="Hide Code"
-              >
-                <PanelLeftClose size={15} /> Hide
-              </button>
-            </div>
-            <div className="pane-content" onDragLeave={handleDragLeave}>
-              {fileError && <div className="error-message">{fileError}</div>}
-              <textarea
-                className="code-editor"
-                value={code}
-                readOnly
-                placeholder={`// Upload your JSX code here to see it rendered...`}
-                spellCheck={false}
-              />
+      <main className="main-content" style={isFullScreen ? { height: '100vh', margin: 0, padding: 0 } : undefined}>
+        <Pane
+          title={<><Code2 size={16} /> Source Code</>}
+          style={{
+            flex: (showCode && !isFullScreen) ? 1 : 0.00001,
+            transform: (showCode && !isFullScreen) ? 'translateX(0) scaleX(1)' : 'translateX(-2rem) scaleX(0)',
+            borderWidth: (showCode && !isFullScreen) ? '3px' : '0px',
+            marginRight: (showCode && !isFullScreen) ? '0' : '-2rem',
+            visibility: (showCode && !isFullScreen) ? 'visible' : 'hidden'
+          }}
+          headerAction={
+            <Button
+              variant="secondary"
+              onClick={() => setShowCode(false)}
+              style={{
+                padding: '0.25rem 0.6rem',
+                fontSize: '0.8rem',
+                borderWidth: '2px',
+                boxShadow: '2px 2px 0px var(--panel-border)'
+              }}
+              title="Hide Code"
+              icon={<PanelLeftClose size={15} />}
+            >
+              Hide
+            </Button>
+          }
+          contentProps={{ onDragLeave: handleDragLeave }}
+        >
+          {fileError && <div className="error-message">{fileError}</div>}
+          <textarea
+            className="code-editor"
+            value={code}
+            readOnly
+            placeholder={`// Upload your JSX code here to see it rendered...`}
+            spellCheck={false}
+          />
 
-              <div className={`upload-overlay ${isHovering ? 'active' : ''}`}>
-                <div className="upload-box">
-                  <Upload size={48} className="upload-icon" />
-                  <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 800 }}>Drop file to load</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
-                    Supports .jsx, .tsx, .js files
-                  </p>
-                </div>
-              </div>
+          <div className={`upload-overlay ${isHovering ? 'active' : ''}`}>
+            <div className="upload-box">
+              <Upload size={48} className="upload-icon" />
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 800 }}>Drop file to load</h3>
+              <p style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>
+                Supports .jsx, .tsx, .js files
+              </p>
             </div>
           </div>
-        )}
+        </Pane>
 
-        <div className="pane">
-          <div className="pane-header">
-            <div className="window-controls">
-              <div className="window-dot dot-red"></div>
-              <div className="window-dot dot-yellow"></div>
-              <div className="window-dot dot-green"></div>
-            </div>
-            <span className="pane-header-title">
-              <Play size={16} /> Render Output
-            </span>
+        <Pane
+          title={<><Play size={16} /> Render Output</>}
+          style={isFullScreen ? { border: 'none', borderRadius: 0, boxShadow: 'none' } : undefined}
+          onRedDotClick={isCodeLoaded ? handleReset : undefined}
+          onGreenDotClick={isCodeLoaded ? () => setIsFullScreen(!isFullScreen) : undefined}
+          headerAction={
+            <Button
+              variant="secondary"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              disabled={!isCodeLoaded}
+              style={{
+                padding: '0.25rem 0.6rem',
+                fontSize: '0.8rem',
+                borderWidth: '2px',
+                boxShadow: !isCodeLoaded ? 'none' : '2px 2px 0px var(--panel-border)',
+                opacity: !isCodeLoaded ? 0.5 : 1,
+                cursor: !isCodeLoaded ? 'not-allowed' : 'pointer'
+              }}
+              title={!isCodeLoaded ? "Upload a file first" : isFullScreen ? "Exit Full Screen" : "Enter Full Screen"}
+              icon={isFullScreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            >
+              {isFullScreen ? "Exit Full Screen" : "Full Screen"}
+            </Button>
+          }
+          contentStyle={{ padding: 0 }}
+        >
+          <div className="render-container" style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
+            <Preview code={code} setCode={setCode} />
           </div>
-          <div className="pane-content" style={{ padding: 0 }}>
-            <div className="render-container" style={{ padding: '2rem', height: '100%', boxSizing: 'border-box' }}>
-              <Preview code={code} />
-            </div>
-          </div>
-        </div>
+        </Pane>
       </main>
+      {showConfirm && (
+        <ConfirmModal
+          message="Are you sure you want to clear the current file?"
+          onConfirm={confirmClear}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
     </div>
   );
 }
