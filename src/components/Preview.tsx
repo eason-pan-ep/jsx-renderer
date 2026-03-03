@@ -192,6 +192,9 @@ export const Preview = ({ code, setCode }: { code: string, setCode: (code: strin
                                 Load Example JSX
                             </Button>
                         </div>
+                        <p className="disclaimer-note">
+                            <strong>Note:</strong> Only self-contained JSX files are supported for now. <br />A general-purpose version is coming soon.
+                        </p>
                     </div>
                 )
             )}

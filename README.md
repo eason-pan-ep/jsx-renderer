@@ -14,6 +14,14 @@ Built with React 19, TypeScript, and Vite.
 - **React Hooks Support**: Upload functional components that utilize standard hooks like `useState` and `useEffect`.
 - **Graceful Error Handling**: Compile-time and runtime errors are caught and displayed safely in the UI, rather than crashing the page.
 
+## Current Limitation
+
+This version supports **standalone, self-contained JSX files only**. The uploaded file must:
+1. Define **all** components used within the same file
+2. Have a **default export** that is a fully renderable component (i.e., renders a complete UI on its own)
+
+A standalone component like a `<Button>` that relies on props will render, but with no props passed you'd see an empty or default-state result. A general-purpose version is planned — see [GENERAL_PURPOSE_PLAN.md](./GENERAL_PURPOSE_PLAN.md) for the roadmap.
+
 ## Getting Started
 
 To run this project locally:
