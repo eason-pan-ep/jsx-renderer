@@ -145,7 +145,7 @@ function App() {
           <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
           JSX Renderer
         </h1>
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+        <div className="header-actions">
           <Button
             variant="secondary"
             onClick={toggleTheme}
@@ -155,16 +155,18 @@ function App() {
             {""}
           </Button>
           {!showCode && (
-            <Button
-              variant="secondary"
-              onClick={() => setShowCode(true)}
-              disabled={!isCodeLoaded}
-              style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
-              title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
-              icon={<PanelLeftOpen size={18} />}
-            >
-              Show Code
-            </Button>
+            <span className="show-code-action">
+              <Button
+                variant="secondary"
+                onClick={() => setShowCode(true)}
+                disabled={!isCodeLoaded}
+                style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
+                title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
+                icon={<PanelLeftOpen size={18} />}
+              >
+                Show Code
+              </Button>
+            </span>
           )}
           {isCodeLoaded ? (
             <Button
