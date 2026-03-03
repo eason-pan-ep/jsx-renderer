@@ -4,6 +4,7 @@ import { Preview } from './components/Preview';
 import { Button } from './components/Button';
 import { Pane } from './components/Pane';
 import { ConfirmModal } from './components/ConfirmModal';
+import { MobileGate } from './components/MobileGate';
 
 function App() {
   const [code, setCode] = useState<string>('');
@@ -126,6 +127,7 @@ function App() {
 
   return (
     <div className={`app-container ${animationClass}`} style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
+      <MobileGate />
       <header
         className="header"
         style={{
