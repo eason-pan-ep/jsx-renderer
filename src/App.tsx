@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Play, PanelLeftClose, PanelLeftOpen, Moon, Sun, Maximize2, Minimize2, Trash2, Code2 } from 'lucide-react';
+import { Upload, Play, PanelLeftClose, PanelLeftOpen, Moon, Sun, Maximize2, Minimize2, Trash2, Code2, Monitor } from 'lucide-react';
 import { Preview } from './components/Preview';
 import { Button } from './components/Button';
 import { Pane } from './components/Pane';
 import { ConfirmModal } from './components/ConfirmModal';
+
 
 function App() {
   const [code, setCode] = useState<string>('');
@@ -126,6 +127,11 @@ function App() {
 
   return (
     <div className={`app-container ${animationClass}`} style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
+
+      <div className="mobile-reminder">
+        <Monitor size={14} strokeWidth={2.5} />
+        For the best experience, use a larger screen.
+      </div>
       <header
         className="header"
         style={{
@@ -143,7 +149,7 @@ function App() {
           <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
           JSX Renderer
         </h1>
-        <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+        <div className="header-actions">
           <Button
             variant="secondary"
             onClick={toggleTheme}
@@ -153,16 +159,18 @@ function App() {
             {""}
           </Button>
           {!showCode && (
-            <Button
-              variant="secondary"
-              onClick={() => setShowCode(true)}
-              disabled={!isCodeLoaded}
-              style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
-              title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
-              icon={<PanelLeftOpen size={18} />}
-            >
-              Show Code
-            </Button>
+            <span className="show-code-action">
+              <Button
+                variant="secondary"
+                onClick={() => setShowCode(true)}
+                disabled={!isCodeLoaded}
+                style={{ opacity: !isCodeLoaded ? 0.5 : 1, cursor: !isCodeLoaded ? 'not-allowed' : 'pointer' }}
+                title={!isCodeLoaded ? "Upload a file first" : "Show Code"}
+                icon={<PanelLeftOpen size={18} />}
+              >
+                Show Code
+              </Button>
+            </span>
           )}
           {isCodeLoaded ? (
             <Button
