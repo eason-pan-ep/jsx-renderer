@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Monitor } from 'lucide-react';
+import { Monitor, Mail } from 'lucide-react';
 
 const SESSION_KEY = 'jsx-renderer-mobile-dismissed';
 
@@ -27,6 +27,8 @@ export const MobileGate: React.FC = () => {
         setDismissed(true);
     };
 
+    const mailtoHref = 'mailto:hi@eleventh-photon.com?subject=Request%3A%20Mobile%20Support%20for%20JSX%20Renderer&body=Hi%2C%20I%E2%80%99d%20love%20to%20use%20JSX%20Renderer%20on%20mobile!';
+
     return (
         <div className="mobile-gate">
             <div className="mobile-gate-card">
@@ -46,6 +48,11 @@ export const MobileGate: React.FC = () => {
                         For the best experience, please visit on a larger screen.
                     </p>
                 </div>
+
+                <a className="mobile-gate-request" href={mailtoHref}>
+                    <Mail size={16} strokeWidth={2.5} />
+                    Request Mobile Support
+                </a>
 
                 <button className="mobile-gate-dismiss" onClick={handleDismiss}>
                     Continue Anyway →

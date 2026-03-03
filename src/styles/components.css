@@ -318,8 +318,38 @@
     font-weight: 500;
 }
 
-.mobile-gate-dismiss {
+.mobile-gate-request {
     margin-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--accent-color);
+    color: var(--btn-text);
+    border: 3px solid var(--panel-border);
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--radius);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: inherit;
+    text-decoration: none;
+    box-shadow: 3px 3px 0px var(--panel-border);
+}
+
+.mobile-gate-request:hover {
+    background: var(--accent-hover);
+}
+
+.mobile-gate-request:active {
+    transform: translate(3px, 3px);
+    box-shadow: 0px 0px 0px var(--panel-border);
+}
+
+.mobile-gate-dismiss {
+    margin-top: 0.5rem;
     background: transparent;
     color: var(--text-secondary);
     border: 2px solid var(--text-secondary);
