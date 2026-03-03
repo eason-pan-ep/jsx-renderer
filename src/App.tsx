@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Play, PanelLeftClose, PanelLeftOpen, Moon, Sun, Maximize2, Minimize2, Trash2, Code2 } from 'lucide-react';
+import { Upload, Play, PanelLeftClose, PanelLeftOpen, Moon, Sun, Maximize2, Minimize2, Trash2, Code2, Monitor } from 'lucide-react';
 import { Preview } from './components/Preview';
 import { Button } from './components/Button';
 import { Pane } from './components/Pane';
@@ -128,6 +128,10 @@ function App() {
   return (
     <div className={`app-container ${animationClass}`} style={isFullScreen ? { padding: 0, gap: 0 } : undefined} onDragOver={handleDragOver} onDrop={handleDrop}>
       <MobileGate />
+      <div className="mobile-reminder">
+        <Monitor size={14} strokeWidth={2.5} />
+        For the best experience, use a larger screen.
+      </div>
       <header
         className="header"
         style={{
