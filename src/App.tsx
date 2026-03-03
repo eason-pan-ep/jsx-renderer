@@ -164,17 +164,7 @@ function App() {
               Show Code
             </Button>
           )}
-          <label className="btn" style={{ margin: 0 }}>
-            <Upload size={18} />
-            Upload JSX
-            <input
-              type="file"
-              accept=".jsx,.tsx,.js,.ts,.txt"
-              onChange={handleFileUpload}
-              style={{ display: 'none' }}
-            />
-          </label>
-          {isCodeLoaded && (
+          {isCodeLoaded ? (
             <Button
               variant="danger"
               onClick={handleReset}
@@ -183,6 +173,17 @@ function App() {
             >
               Clear
             </Button>
+          ) : (
+            <label className="btn" style={{ margin: 0 }}>
+              <Upload size={18} />
+              Upload JSX
+              <input
+                type="file"
+                accept=".jsx,.tsx,.js,.ts,.txt"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+            </label>
           )}
         </div>
       </header>

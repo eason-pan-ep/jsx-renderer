@@ -1,43 +1,116 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as Babel from '@babel/standalone';
 import { Code2, Atom, Star } from 'lucide-react';
 import { EXAMPLE_JSX } from '../constants/exampleJsx';
 import { Button } from './Button';
 
-export const Preview = ({ code, setCode }: { code: string, setCode: (code: string) => void }) => {
-    const [Component, setComponent] = useState<React.ComponentType | null>(null);
-    const [error, setError] = useState<string | null>(null);
+// Pre-built React+ReactDOM IIFE bundle (inlined at build time via Vite ?raw import)
+// @ts-ignore — Vite raw import
+import sandboxReactBundle from '../sandbox/react-bundle.js?raw';
 
-    React.useEffect(() => {
+/**
+ * Build a self-contained HTML document that runs transpiled user code
+ * inside a sandboxed iframe. React is inlined so no external fetches
+ * are needed from within the sandbox.
+ */
+function buildSandboxHTML(transpiledCode: string): string {
+    return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<script>${sandboxReactBundle}<\/script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+    color: #0f172a;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// Report errors back to the parent window
+window.onerror = function(msg, src, line, col, err) {
+    parent.postMessage({ type: 'sandbox-error', message: String(msg) }, '*');
+    return true;
+};
+window.addEventListener('unhandledrejection', function(e) {
+    parent.postMessage({ type: 'sandbox-error', message: String(e.reason) }, '*');
+});
+
+try {
+    // Evaluate the transpiled CommonJS module
+    var exports = {};
+    var require = function(moduleName) {
+        if (moduleName === 'react') return React;
+        throw new Error("Module '" + moduleName + "' cannot be resolved in browser context");
+    };
+
+    (function(exports, require, React) {
+        "use strict";
+        ${transpiledCode}
+    })(exports, require, React);
+
+    // Extract the component (default export or first named export)
+    var Component = exports.default;
+    if (!Component) {
+        var values = Object.values(exports);
+        if (values.length > 0) Component = values[0];
+    }
+
+    if (typeof Component !== 'function' && (typeof Component !== 'object' || Component === null)) {
+        throw new Error('Your code must export default a valid React component.');
+    }
+
+    // Render
+    var root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(Component));
+
+    // Signal success to parent
+    parent.postMessage({ type: 'sandbox-ready' }, '*');
+} catch (e) {
+    parent.postMessage({ type: 'sandbox-error', message: e.message || String(e) }, '*');
+}
+<\/script>
+</body>
+</html>`;
+}
+
+export const Preview = ({ code, setCode }: { code: string, setCode: (code: string) => void }) => {
+    const [error, setError] = useState<string | null>(null);
+    const [iframeSrc, setIframeSrc] = useState<string | null>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    // Listen for messages from the sandbox iframe
+    const handleMessage = useCallback((event: MessageEvent) => {
+        const data = event.data;
+        if (!data || typeof data !== 'object') return;
+
+        if (data.type === 'sandbox-error') {
+            setError(data.message || 'Unknown error in sandbox.');
+        } else if (data.type === 'sandbox-ready') {
+            setError(null);
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener('message', handleMessage);
+    }, [handleMessage]);
+
+    // Transpile and build sandbox whenever code changes
+    useEffect(() => {
         if (!code.trim()) {
-            setComponent(null);
+            setIframeSrc(null);
             setError(null);
             return;
         }
 
         try {
-            // Security Plugin to prevent basic XSS and malicious global access
-            const securityPlugin = function () {
-                return {
-                    visitor: {
-                        Identifier(path: any) {
-                            const forbidden = ['window', 'document', 'localStorage', 'sessionStorage', 'fetch', 'XMLHttpRequest', 'eval', 'globalThis', 'Function'];
-                            if (forbidden.includes(path.node.name)) {
-                                // Allow if it's a property of an object (e.g., obj.window)
-                                if (path.parentPath.isMemberExpression() && path.parentKey === 'property' && !path.parent.computed) {
-                                    return;
-                                }
-                                throw new Error(`Security Exception: Usage of '${path.node.name}' is not allowed in this sandbox.`);
-                            }
-                        }
-                    }
-                };
-            };
-
-            // 1. Transpile JSX/TSX to JS
+            // Transpile JSX/TSX → JS with Babel (no security plugin needed — iframe is the boundary)
             const result = Babel.transform(code, {
                 presets: ['env', 'react', 'typescript'],
-                plugins: [securityPlugin],
                 filename: 'dynamic.tsx'
             });
 
@@ -45,47 +118,16 @@ export const Preview = ({ code, setCode }: { code: string, setCode: (code: strin
                 throw new Error('Compilation failed silently.');
             }
 
-            // 2. Evaluate the commonjs module output
-            const exports: Record<string, any> = {};
-            const customRequire = (moduleName: string) => {
-                if (moduleName === 'react') return React;
-                throw new Error(`Module '${moduleName}' cannot be resolved in browser context`);
-            };
-
-            // We wrap the code in a function providing standard CommonJS globals, and strictly block sensitive globals
-            const executeFn = new Function(
-                'exports', 'require', 'React', 'window', 'document', 'fetch', 'localStorage', 'sessionStorage', 'globalThis',
-                `"use strict";\n${result.code}`
-            );
-            executeFn(exports, customRequire, React);
-
-            // 3. Extract the default export or the first available component
-            let ExtractedComponent = exports.default;
-
-            // Fallback: if no default export, see if they exported something else like: export const App = () => ...
-            if (!ExtractedComponent) {
-                const exportedValues = Object.values(exports);
-                if (exportedValues.length > 0) {
-                    ExtractedComponent = exportedValues[0];
-                } else {
-                    // Fallback for code like: function App() { return <div></div> }; return App;
-                    // Wait, Babel might not expose functions unless explicitly exported. 
-                }
-            }
-
-            if (typeof ExtractedComponent === 'function' || (typeof ExtractedComponent === 'object' && ExtractedComponent !== null)) {
-                setComponent(() => ExtractedComponent);
-                setError(null);
-            } else {
-                throw new Error('Your code must `export default` a valid React component.');
-            }
+            // Build the sandboxed HTML document with inlined React
+            const html = buildSandboxHTML(result.code);
+            setIframeSrc(html);
+            setError(null);
 
         } catch (err: any) {
             console.error(err);
-            // Clean up babel error messages if they are too noisy
             let errorMsg = err.message || String(err);
             setError(errorMsg);
-            // We don't nullify Component here so the user can still see their last valid render while typing
+            setIframeSrc(null);
         }
     }, [code]);
 
@@ -97,8 +139,14 @@ export const Preview = ({ code, setCode }: { code: string, setCode: (code: strin
                     {error}
                 </div>
             )}
-            {Component ? (
-                <Component />
+            {iframeSrc ? (
+                <iframe
+                    ref={iframeRef}
+                    className="sandbox-frame"
+                    sandbox="allow-scripts"
+                    srcDoc={iframeSrc}
+                    title="JSX Render Output"
+                />
             ) : (
                 !error && (
                     <div style={{
@@ -119,7 +167,7 @@ export const Preview = ({ code, setCode }: { code: string, setCode: (code: strin
                         </div>
                         <div style={{
                             display: 'flex',
-                            gap: '2.5rem', /* Increased gap between folders */
+                            gap: '2.5rem',
                         }}>
                             <div className="empty-state-badge">
                                 <div className="badge-icon" style={{ '--folder-color': '#d1b8cc' } as React.CSSProperties}>
