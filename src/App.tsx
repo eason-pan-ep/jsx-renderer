@@ -3,6 +3,7 @@ import { Upload, Play, PanelLeftClose, PanelLeftOpen, Moon, Sun, Maximize2, Mini
 import { Preview } from './components/Preview';
 import { Button } from './components/Button';
 import { Pane } from './components/Pane';
+import { ConfirmModal } from './components/ConfirmModal';
 
 function App() {
   const [code, setCode] = useState<string>('');
@@ -13,6 +14,7 @@ function App() {
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [isFlickering, setIsFlickering] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
@@ -104,6 +106,11 @@ function App() {
   };
 
   const handleReset = () => {
+    setShowConfirm(true);
+  };
+
+  const confirmClear = () => {
+    setShowConfirm(false);
     triggerClearGlitch(() => {
       setCode('');
       setFileError(null);
@@ -231,6 +238,8 @@ function App() {
         <Pane
           title={<><Play size={16} /> Render Output</>}
           style={isFullScreen ? { border: 'none', borderRadius: 0, boxShadow: 'none' } : undefined}
+          onRedDotClick={isCodeLoaded ? handleReset : undefined}
+          onGreenDotClick={isCodeLoaded ? () => setIsFullScreen(!isFullScreen) : undefined}
           headerAction={
             <Button
               variant="secondary"
@@ -257,6 +266,13 @@ function App() {
           </div>
         </Pane>
       </main>
+      {showConfirm && (
+        <ConfirmModal
+          message="Are you sure you want to clear the current file?"
+          onConfirm={confirmClear}
+          onCancel={() => setShowConfirm(false)}
+        />
+      )}
     </div>
   );
 }

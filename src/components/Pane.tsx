@@ -11,6 +11,10 @@ interface PaneProps {
     contentStyle?: React.CSSProperties;
     /** Extra props to spread on the pane-content div (e.g. onDragLeave) */
     contentProps?: React.HTMLAttributes<HTMLDivElement>;
+    /** Easter egg: click handler for the red window dot */
+    onRedDotClick?: () => void;
+    /** Easter egg: click handler for the green window dot */
+    onGreenDotClick?: () => void;
     children: React.ReactNode;
 }
 
@@ -20,15 +24,25 @@ export const Pane: React.FC<PaneProps> = ({
     style,
     contentStyle,
     contentProps,
+    onRedDotClick,
+    onGreenDotClick,
     children,
 }) => {
     return (
         <div className="pane" style={style}>
             <div className="pane-header">
                 <div className="window-controls">
-                    <div className="window-dot dot-red"></div>
+                    <div
+                        className={`window-dot dot-red ${onRedDotClick ? 'dot-clickable' : ''}`}
+                        onClick={onRedDotClick}
+                        title={onRedDotClick ? 'Close' : undefined}
+                    ></div>
                     <div className="window-dot dot-yellow"></div>
-                    <div className="window-dot dot-green"></div>
+                    <div
+                        className={`window-dot dot-green ${onGreenDotClick ? 'dot-clickable' : ''}`}
+                        onClick={onGreenDotClick}
+                        title={onGreenDotClick ? 'Full Screen' : undefined}
+                    ></div>
                 </div>
                 <span className="pane-header-title">
                     {title}
