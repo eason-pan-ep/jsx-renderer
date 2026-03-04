@@ -19,6 +19,25 @@ function buildSandboxHTML(transpiledCode: string): string {
 <head>
 <meta charset="utf-8" />
 <script>${sandboxReactBundle}<\/script>
+<script>
+// Shim localStorage/sessionStorage – sandboxed iframes without
+// allow-same-origin throw SecurityError on any access.
+(function() {
+  function FakeStorage() { this._d = {}; }
+  FakeStorage.prototype.getItem = function(k) { return this._d.hasOwnProperty(k) ? this._d[k] : null; };
+  FakeStorage.prototype.setItem = function(k, v) { this._d[k] = String(v); };
+  FakeStorage.prototype.removeItem = function(k) { delete this._d[k]; };
+  FakeStorage.prototype.clear = function() { this._d = {}; };
+  FakeStorage.prototype.key = function(i) { var keys = Object.keys(this._d); return keys[i] || null; };
+  Object.defineProperty(FakeStorage.prototype, 'length', { get: function() { return Object.keys(this._d).length; } });
+  try { window.localStorage.setItem('__test', '1'); window.localStorage.removeItem('__test'); } catch(e) {
+    Object.defineProperty(window, 'localStorage', { value: new FakeStorage(), configurable: true });
+  }
+  try { window.sessionStorage.setItem('__test', '1'); window.sessionStorage.removeItem('__test'); } catch(e) {
+    Object.defineProperty(window, 'sessionStorage', { value: new FakeStorage(), configurable: true });
+  }
+})();
+<\/script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
