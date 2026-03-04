@@ -44,7 +44,16 @@ try {
     var exports = {};
     var require = function(moduleName) {
         if (moduleName === 'react') return React;
+        if (moduleName === 'react-dom' || moduleName === 'react-dom/client') return ReactDOM;
         throw new Error("Module '" + moduleName + "' cannot be resolved in browser context");
+    };
+
+    // Intercept ReactDOM.createRoot to detect self-rendering code
+    var __selfRendered = false;
+    var __origCreateRoot = ReactDOM.createRoot.bind(ReactDOM);
+    ReactDOM.createRoot = function() {
+        __selfRendered = true;
+        return __origCreateRoot.apply(this, arguments);
     };
 
     (function(exports, require, React) {
@@ -52,23 +61,32 @@ try {
         ${transpiledCode}
     })(exports, require, React);
 
-    // Extract the component (default export or first named export)
-    var Component = exports.default;
-    if (!Component) {
-        var values = Object.values(exports);
-        if (values.length > 0) Component = values[0];
+    // Restore original
+    ReactDOM.createRoot = __origCreateRoot;
+
+    if (__selfRendered) {
+        // Code already called ReactDOM.createRoot and rendered itself
+        parent.postMessage({ type: 'sandbox-ready' }, '*');
+    } else {
+        // Extract the component (default export or first named export)
+        var Component = exports.default;
+        if (!Component) {
+            var values = Object.values(exports);
+            if (values.length > 0) Component = values[0];
+        }
+
+        if (typeof Component !== 'function' && (typeof Component !== 'object' || Component === null)) {
+            throw new Error('Your code must export default a valid React component.');
+        }
+
+        // Render
+        var rootEl = document.getElementById('root');
+        var root = __origCreateRoot(rootEl);
+        root.render(React.createElement(Component));
+
+        // Signal success to parent
+        parent.postMessage({ type: 'sandbox-ready' }, '*');
     }
-
-    if (typeof Component !== 'function' && (typeof Component !== 'object' || Component === null)) {
-        throw new Error('Your code must export default a valid React component.');
-    }
-
-    // Render
-    var root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(Component));
-
-    // Signal success to parent
-    parent.postMessage({ type: 'sandbox-ready' }, '*');
 } catch (e) {
     parent.postMessage({ type: 'sandbox-error', message: e.message || String(e) }, '*');
 }
