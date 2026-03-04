@@ -1,66 +1,89 @@
 # JSX Renderer
 
-A beautiful, retro-tech web application that instantly transpiles and renders React components directly in your browser. 
+A retro-tech web application that transpiles and renders React components directly in your browser — no backend required.
 
 Built with React 19, TypeScript, and Vite.
 
 ## Features
 
-- **Live Transpilation**: Utilizing `@babel/standalone`, this app parses and executes modern ES6, TypeScript, and JSX syntax directly in the client—no backend required.
-- **Sandboxed Rendering**: User code runs inside a browser-enforced `<iframe sandbox="allow-scripts">`, providing full access to browser APIs (`window`, `document`, `fetch`, etc.) while keeping the host page completely isolated and secure.
-- **Drag and Drop**: Simply drag a `.jsx`, `.tsx`, or `.js` file onto the window, and it will load into the viewer and render the component instantly.
-- **Clean Retro Tech Aesthetic**: A premium interface featuring thick window borders, structural shadows, background grids, and classic window control dots with hidden easter eggs.
-- **Theme Toggling**: Seamlessly switch between Tech Light mode (default) and Cyber Dark mode with a satisfying TV-flicker transition.
-- **React Hooks Support**: Upload functional components that utilize standard hooks like `useState` and `useEffect`.
-- **Graceful Error Handling**: Compile-time and runtime errors are caught and displayed safely in the UI, rather than crashing the page.
+- **Live Transpilation** — `@babel/standalone` parses and executes modern ES6, TypeScript, and JSX/TSX syntax entirely client-side.
+- **Sandboxed Rendering** — User code runs inside a browser-enforced `<iframe sandbox="allow-scripts">`, keeping the host page completely isolated.
+- **Drag & Drop Upload** — Drop a `.jsx`, `.tsx`, `.js`, or `.ts` file anywhere on the window, or use the upload modal with its own drag-drop zone and file picker.
+- **Fullscreen Mode** — Expand the render pane to full screen via the green window dot or the maximize button.
+- **Show / Hide Code** — Toggle the source code pane on or off to focus on either the code or the rendered output.
+- **Theme Toggle** — Switch between Tech Light and Cyber Dark modes with a CRT-flicker transition (click the red window dot).
+- **Built-in Example** — Load a Task Tracker demo to see the renderer in action without uploading anything.
+- **React Hooks Support** — Functional components with standard hooks (`useState`, `useEffect`, etc.) work out of the box.
+- **Graceful Error Handling** — Compile-time and runtime errors are caught in the sandbox and displayed in the UI instead of crashing the page.
+- **Mobile Awareness** — A gentle reminder encourages users on small screens to switch to a larger display for the best experience.
 
-## Current Limitation
+## Limitations
 
-This version supports **standalone, self-contained JSX files only**. The uploaded file must:
-1. Define **all** components used within the same file
-2. Have a **default export** that is a fully renderable component (i.e., renders a complete UI on its own)
+This version supports **standalone, self-contained files only**. The uploaded file must:
 
-A standalone component like a `<Button>` that relies on props will render, but with no props passed you'd see an empty or default-state result. A general-purpose version is planned — see [GENERAL_PURPOSE_PLAN.md](./GENERAL_PURPOSE_PLAN.md) for the roadmap.
+1. Define **all** components within the same file.
+2. Either `export default` a renderable React component, **or** call `ReactDOM.createRoot` directly.
+
+A standalone component like `<Button>` that depends on props will render, but with no props passed you'll see an empty or default-state result. A general-purpose version is planned — see [GENERAL_PURPOSE_PLAN.md](./docs/GENERAL_PURPOSE_PLAN.md) for the roadmap.
 
 ## Getting Started
 
-To run this project locally:
-
-1. Clone the repository and navigate into the directory:
+1. Clone and install:
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/eason-pan-ep/jsx-renderer.git
    cd jsx-renderer
-   ```
-2. Install dependencies:
-   ```bash
    npm install
    ```
-3. Start the development server:
+
+2. Start the dev server:
    ```bash
    npm run dev
    ```
+
+## Build Commands
+
+| Command              | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| `npm run dev`        | Start the Vite dev server                          |
+| `npm run build`      | TypeScript check + Vite production build           |
+| `npm run build:sandbox` | Rebuild the React IIFE bundle for the sandbox iframe |
+| `npm run lint`       | Run ESLint                                         |
+| `npm run preview`    | Preview the production build locally               |
 
 ## Architecture
 
 ### Sandbox Isolation
 
-User-uploaded JSX is rendered inside a sandboxed `<iframe>` for security:
+User-uploaded code is rendered inside a sandboxed `<iframe>` for security:
 
-1. **Babel transpiles** the JSX/TSX to plain JavaScript (in the parent page)
-2. A self-contained **HTML document** is assembled with React inlined
-3. The HTML is rendered via `<iframe sandbox="allow-scripts" srcdoc="...">` 
-4. **Errors are reported** back to the parent via `postMessage`
+1. **Babel transpiles** JSX/TSX to plain JavaScript in the parent page.
+2. A self-contained **HTML document** is assembled with React inlined as a pre-built IIFE bundle.
+3. The document is rendered via `<iframe sandbox="allow-scripts" srcdoc="...">`.
+4. The sandbox detects whether the code calls `ReactDOM.createRoot` itself (self-rendering) or exports a component (rendered by the sandbox harness).
+5. **Errors are reported** back to the parent via `postMessage`.
 
-The React runtime used inside the iframe is pre-built as a standalone IIFE bundle (`src/sandbox/react-bundle.js`). If you upgrade React, rebuild it with:
+If you upgrade React, rebuild the sandbox bundle with:
 
 ```bash
 npm run build:sandbox
 ```
 
+### Project Structure
 
-## Technologies Used
+```
+src/
+├── components/        # React components (Preview, UploadModal, Pane, Button, ConfirmModal)
+├── constants/         # Built-in example JSX
+├── sandbox/           # Pre-built React IIFE bundle and build entry
+├── styles/            # Modular CSS (theme, layout, components, animations)
+├── App.tsx            # Main app container
+└── main.tsx           # Entry point
+```
+
+## Technologies
+
 - React 19
-- Vite
 - TypeScript
+- Vite
 - `@babel/standalone`
-- Lucide React (Icons)
+- Lucide React (icons)
