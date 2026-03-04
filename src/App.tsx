@@ -144,6 +144,7 @@ function App() {
         <h1>
           <img src="/jsx_renderer_icon.png" alt="JSX Renderer Icon" style={{ width: '32px', height: '32px' }} />
           JSX Renderer
+          <span className="version-badge">v{__APP_VERSION__}</span>
         </h1>
         <div className="header-actions">
           <Button
