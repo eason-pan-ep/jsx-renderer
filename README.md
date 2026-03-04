@@ -24,7 +24,7 @@ This version supports **standalone, self-contained files only**. The uploaded fi
 1. Define **all** components within the same file.
 2. Either `export default` a renderable React component, **or** call `ReactDOM.createRoot` directly.
 
-A standalone component like `<Button>` that depends on props will render, but with no props passed you'll see an empty or default-state result. A general-purpose version is planned — see [GENERAL_PURPOSE_PLAN.md](./docs/GENERAL_PURPOSE_PLAN.md) for the roadmap.
+A standalone component like `<Button>` that depends on props will render, but with no props passed you'll see an empty or default-state result. A general-purpose version is planned.
 
 ## Getting Started
 
