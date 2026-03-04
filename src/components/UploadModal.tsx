@@ -96,13 +96,13 @@ export const UploadModal: React.FC<UploadModalProps> = ({ onFileSelected, onCanc
                 </div>
 
                 <p className="upload-modal-formats">
-                    Supported: .jsx, .tsx, .js, .ts, .txt
+                    Supported: .jsx, .tsx, .js, .ts
                 </p>
 
                 <input
                     ref={fileInputRef}
                     type="file"
-                    accept=".jsx,.tsx,.js,.ts,.txt"
+                    accept=".jsx,.tsx,.js,.ts"
                     onChange={handleInputChange}
                     style={{ display: 'none' }}
                 />
