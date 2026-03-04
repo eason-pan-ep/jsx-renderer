@@ -4,6 +4,7 @@ import { Preview } from './components/Preview';
 import { Button } from './components/Button';
 import { Pane } from './components/Pane';
 import { ConfirmModal } from './components/ConfirmModal';
+import { UploadModal } from './components/UploadModal';
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
   const [isFlickering, setIsFlickering] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   // Initialize theme from localStorage or system preference
   useEffect(() => {
@@ -56,12 +58,6 @@ function App() {
       document.body.classList.remove('theme-tv');
     }
   }, [isFlickering]);
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    readFile(file);
-  };
 
   const triggerClearGlitch = (action: () => void) => {
     // The Clear button uses the heavy TV channel switch effect.
@@ -182,16 +178,12 @@ function App() {
               Clear
             </Button>
           ) : (
-            <label className="btn" style={{ margin: 0 }}>
-              <Upload size={18} />
+            <Button
+              onClick={() => setShowUploadModal(true)}
+              icon={<Upload size={18} />}
+            >
               Upload JSX
-              <input
-                type="file"
-                accept=".jsx,.tsx,.js,.ts,.txt"
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-              />
-            </label>
+            </Button>
           )}
         </div>
       </header>
@@ -280,6 +272,15 @@ function App() {
           message="Are you sure you want to clear the current file?"
           onConfirm={confirmClear}
           onCancel={() => setShowConfirm(false)}
+        />
+      )}
+      {showUploadModal && (
+        <UploadModal
+          onFileSelected={(file) => {
+            setShowUploadModal(false);
+            readFile(file);
+          }}
+          onCancel={() => setShowUploadModal(false)}
         />
       )}
     </div>

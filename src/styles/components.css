@@ -227,6 +227,109 @@
     }
 }
 
+/* Upload modal */
+.upload-modal {
+    min-width: 400px;
+    max-width: 480px;
+}
+
+.upload-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.upload-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.upload-modal-close {
+    background: none;
+    border: 2px solid var(--panel-border);
+    border-radius: var(--radius);
+    color: var(--text-primary);
+    cursor: pointer;
+    padding: 0.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: 2px 2px 0px var(--panel-border);
+}
+
+.upload-modal-close:hover {
+    background: var(--title-bar-bg);
+}
+
+.upload-modal-close:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px var(--panel-border);
+}
+
+.upload-drop-zone {
+    border: 3px dashed var(--accent-color);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--bg-color);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.05);
+}
+
+.upload-drop-zone:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent-hover);
+}
+
+.upload-drop-zone.dragging {
+    border-color: var(--accent-hover);
+    background: var(--panel-bg);
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px var(--accent-color);
+}
+
+.upload-drop-icon {
+    color: var(--accent-color);
+    margin-bottom: 0.75rem;
+}
+
+.upload-drop-text {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.upload-drop-hint {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+}
+
+.upload-modal-formats {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.upload-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.25rem;
+}
+
 /* Disclaimer note */
 .disclaimer-note {
     margin-top: 1.5rem;
