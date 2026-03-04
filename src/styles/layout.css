@@ -30,6 +30,19 @@
     letter-spacing: -0.02em;
 }
 
+.version-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: var(--title-bar-bg);
+    border: 2px solid var(--panel-border);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    letter-spacing: 0.03em;
+    text-transform: none;
+    line-height: 1;
+}
+
 .main-content {
     display: flex;
     flex: 1;
