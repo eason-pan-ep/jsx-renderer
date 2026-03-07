@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as Babel from '@babel/standalone';
-import { Code2, Atom, Star } from 'lucide-react';
+import { Atom, Star, Upload } from 'lucide-react';
 import { EXAMPLE_JSX } from '../constants/exampleJsx';
 import { Button } from './Button';
 
@@ -114,7 +114,7 @@ try {
 </html>`;
 }
 
-export const Preview = ({ code, setCode }: { code: string, setCode: (code: string) => void }) => {
+export const Preview = ({ code, setCode, onUpload }: { code: string, setCode: (code: string) => void, onUpload: () => void }) => {
     const [error, setError] = useState<string | null>(null);
     const [iframeSrc, setIframeSrc] = useState<string | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -219,15 +219,24 @@ export const Preview = ({ code, setCode }: { code: string, setCode: (code: strin
                                 <span>React Hooks</span>
                             </div>
                         </div>
-                        <div style={{ marginTop: '1rem' }}>
-                            <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Or try it out with a sample component:</p>
+                        <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                             <Button
-                                onClick={() => setCode(EXAMPLE_JSX)}
-                                style={{ fontSize: '1rem', padding: '0.75rem 1.5rem' }}
-                                icon={<Code2 size={20} />}
+                                onClick={onUpload}
+                                style={{ fontSize: '1rem', padding: '0.75rem 1.75rem' }}
+                                icon={<Upload size={20} />}
                             >
-                                Load Example JSX
+                                Upload JSX
                             </Button>
+                            <p style={{ color: 'var(--text-secondary)', fontWeight: 600, fontSize: '0.9rem' }}>
+                                Or try it out with a{' '}
+                                <a
+                                    href="#"
+                                    onClick={(e) => { e.preventDefault(); setCode(EXAMPLE_JSX); }}
+                                    style={{ color: 'var(--accent-color)', fontWeight: 700, textDecoration: 'underline', cursor: 'pointer' }}
+                                >
+                                    sample component
+                                </a>
+                            </p>
                         </div>
                         <p className="disclaimer-note">
                             <strong>Note:</strong> Only self-contained JSX files are supported for now. <br />A general-purpose version is coming soon.
