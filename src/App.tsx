@@ -169,7 +169,7 @@ function App() {
               </Button>
             </span>
           )}
-          {isCodeLoaded ? (
+          {isCodeLoaded && (
             <Button
               variant="danger"
               onClick={handleReset}
@@ -177,13 +177,6 @@ function App() {
               icon={<Trash2 size={18} />}
             >
               Clear
-            </Button>
-          ) : (
-            <Button
-              onClick={() => setShowUploadModal(true)}
-              icon={<Upload size={18} />}
-            >
-              Upload JSX
             </Button>
           )}
         </div>
@@ -264,7 +257,7 @@ function App() {
           contentStyle={{ padding: 0 }}
         >
           <div className="render-container" style={{ height: '100%', boxSizing: 'border-box' }}>
-            <Preview code={code} setCode={setCode} />
+            <Preview code={code} setCode={setCode} onUpload={() => setShowUploadModal(true)} />
           </div>
         </Pane>
       </main>
